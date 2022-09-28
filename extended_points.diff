@@ -1,0 +1,1175 @@
+ m2clientsource/Client/GameLib/ItemData.h           |   4 +-
+ m2clientsource/Client/GameLib/ItemManager.h        |   2 +-
+ .../Client/UserInterface/AbstractPlayer.h          |   2 +-
+ m2clientsource/Client/UserInterface/GameType.cpp   |   2 +-
+ m2clientsource/Client/UserInterface/GameType.h     |   4 +-
+ m2clientsource/Client/UserInterface/Packet.h       |   6 +-
+ .../Client/UserInterface/PythonExchange.cpp        |   8 +--
+ .../Client/UserInterface/PythonExchange.h          |   8 +--
+ .../Client/UserInterface/PythonExchangeModule.cpp  |   4 +-
+ .../Client/UserInterface/PythonItemModule.cpp      |   2 +-
+ .../Client/UserInterface/PythonPlayer.cpp          |   4 +-
+ m2clientsource/Client/UserInterface/PythonPlayer.h |   4 +-
+ .../Client/UserInterface/PythonPlayerModule.cpp    |   2 +-
+ m2clientsource/Client/UserInterface/StdAfx.h       |   2 +-
+ m2source/Server/common/length.h                    |   2 +-
+ m2source/Server/common/tables.h                    |   8 +--
+ m2source/Server/game/src/DragonSoul.cpp            |   6 +-
+ m2source/Server/game/src/affect.h                  |   2 +-
+ m2source/Server/game/src/battle.h                  |   6 +-
+ m2source/Server/game/src/buff_on_attributes.cpp    |   2 +-
+ m2source/Server/game/src/buff_on_attributes.h      |   4 +-
+ m2source/Server/game/src/char.cpp                  |  18 ++---
+ m2source/Server/game/src/char.h                    |  24 +++----
+ m2source/Server/game/src/char_affect.cpp           |   6 +-
+ m2source/Server/game/src/char_item.cpp             |   4 +-
+ m2source/Server/game/src/char_skill.cpp            |   4 +-
+ m2source/Server/game/src/cmd_general.cpp           |   2 +-
+ m2source/Server/game/src/cmd_gm.cpp                |   2 +-
+ m2source/Server/game/src/constants.h               |   2 +-
+ m2source/Server/game/src/guild.cpp                 |   2 +-
+ m2source/Server/game/src/guild.h                   |   2 +-
+ m2source/Server/game/src/item.cpp                  |   2 +-
+ m2source/Server/game/src/item.h                    |  34 ++++-----
+ m2source/Server/game/src/item_attribute.cpp        |  30 ++++----
+ m2source/Server/game/src/packet.h                  |   4 +-
+ m2source/Server/game/src/questlua_affect.cpp       |  10 +--
+ m2source/Server/game/src/questlua_item.cpp         |   6 +-
+ m2source/Server/game/src/questlua_party.cpp        |   6 +-
+ m2source/Server/game/src/questlua_pc.cpp           |   2 +-
+ m2source/Server/game/src/skill.h                   |   6 +-
+ 43 files changed, 168 insertions(+), 168 deletions(-)
+
+diff --git a/m2clientsource/Client/GameLib/ItemData.h b/m2clientsource/Client/GameLib/ItemData.h
+index 518c2989..1308104e 100644
+--- a/m2clientsource/Client/GameLib/ItemData.h
++++ b/m2clientsource/Client/GameLib/ItemData.h
+@@ -899,7 +899,7 @@ public:
+ 
+ 	typedef struct SItemApply
+ 	{
+-		BYTE bType;
++		WORD bType;
+ 		long lValue;
+ 	} TItemApply;
+ 
+diff --git a/m2clientsource/Client/GameLib/ItemManager.h b/m2clientsource/Client/GameLib/ItemManager.h
+index b8fe4941..c2388a70 100644
+--- a/m2clientsource/Client/GameLib/ItemManager.h
++++ b/m2clientsource/Client/GameLib/ItemManager.h
+@@ -42,7 +42,7 @@ class CItemManager : public CSingleton<CItemManager>
+ 		typedef struct SBlendInfo
+ 		{
+ 			DWORD	dwVnum;
+-			BYTE	bApplyType;
++			WORD	bApplyType;
+ 			std::vector<int>	vec_iApplyValue;
+ 			std::vector<int>	vec_iApplyDuration;
+ 		} TBlendInfo;
+diff --git a/m2clientsource/Client/UserInterface/AbstractPlayer.h b/m2clientsource/Client/UserInterface/AbstractPlayer.h
+index bad6bfd7..681a9610 100644
+--- a/m2clientsource/Client/UserInterface/AbstractPlayer.h
++++ b/m2clientsource/Client/UserInterface/AbstractPlayer.h
+@@ -30,7 +30,7 @@ class IAbstractPlayer : public TAbstractSingleton<IAbstractPlayer>
+ 		virtual void	SetItemData(TItemPos itemPos, const TItemData & c_rkItemInst) = 0;
+ 		virtual void	SetItemCount(TItemPos itemPos, BYTE byCount) = 0;
+ 		virtual void	SetItemMetinSocket(TItemPos itemPos, DWORD dwMetinSocketIndex, DWORD dwMetinNumber) = 0;
+-		virtual void	SetItemAttribute(TItemPos itemPos, DWORD dwAttrIndex, BYTE byType, short sValue) = 0;
++		virtual void	SetItemAttribute(TItemPos itemPos, DWORD dwAttrIndex, WORD byType, short sValue) = 0;
+ #if defined(GAIDEN)
+ 		virtual void	SetItemUnbindTime(DWORD dwItemSlotIndex, DWORD dwUnbindSecondsLeft) = 0;
+ #endif
+diff --git a/m2clientsource/Client/UserInterface/GameType.cpp b/m2clientsource/Client/UserInterface/GameType.cpp
+index cf588891..1f15da23 100644
+--- a/m2clientsource/Client/UserInterface/GameType.cpp
++++ b/m2clientsource/Client/UserInterface/GameType.cpp
+@@ -274,7 +274,7 @@ const TApplyInfo aApplyInfo[CItemData::MAX_APPLY_NUM] =
+ 	{ CItemData::POINT_ENCHANT_CHARACTERS				},	// APPLY_ENCHANT_CHARACTERS
+ #endif
+ };
+-BYTE ApplyTypeToPointType(BYTE bApplyType)
++BYTE ApplyTypeToPointType(WORD bApplyType)
+ {
+ 	if (bApplyType >= CItemData::MAX_APPLY_NUM)
+ 		return CItemData::POINT_NONE;
+diff --git a/m2clientsource/Client/UserInterface/GameType.h b/m2clientsource/Client/UserInterface/GameType.h
+index 50edc552..849e112d 100644
+--- a/m2clientsource/Client/UserInterface/GameType.h
++++ b/m2clientsource/Client/UserInterface/GameType.h
+@@ -542,7 +542,7 @@ typedef struct SQuickSlot
+ 
+ typedef struct TPlayerItemAttribute
+ {
+-    BYTE        bType;
++    WORD        bType;
+     short       sValue;
+ } TPlayerItemAttribute;
+ 
+@@ -665,7 +665,7 @@ void SetGuildSymbolPath(const char * c_szPathName);
+ const char * GetGuildSymbolFileName(DWORD dwGuildID);
+ BYTE SlotTypeToInvenType(BYTE bSlotType);
+ #ifdef ENABLE_BONUS_TABLE
+-BYTE ApplyTypeToPointType(BYTE bApplyType);
++BYTE ApplyTypeToPointType(WORD bApplyType);
+ #endif
+ #ifdef ENABLE_AURA_COSTUME_SYSTEM
+ int* GetAuraRefineInfo(BYTE bLevel);
+diff --git a/m2clientsource/Client/UserInterface/Packet.h b/m2clientsource/Client/UserInterface/Packet.h
+index 4d4ae69a..5cb4d491 100644
+--- a/m2clientsource/Client/UserInterface/Packet.h
++++ b/m2clientsource/Client/UserInterface/Packet.h
+@@ -1912,7 +1912,7 @@ typedef struct packet_point_change
+ 	int header;
+ 
+ 	DWORD dwVID;
+-	BYTE Type;
++	WORD Type;
+ 
+ 	long amount;
+ 	long value;
+@@ -2922,7 +2922,7 @@ typedef struct
+ typedef struct SPacketAffectElement
+ {
+ 	DWORD dwType;
+-	BYTE bPointIdxApplyOn;
++	WORD bPointIdxApplyOn;
+ 	long lApplyValue;
+ 	DWORD dwFlag;
+ 	long lDuration;
+@@ -2939,7 +2939,7 @@ typedef struct SPacketGCAffectRemove
+ {
+ 	BYTE bHeader;
+ 	DWORD dwType;
+-	BYTE bApplyOn;
++	WORD bApplyOn;
+ } TPacketGCAffectRemove;
+ 
+ typedef struct packet_mall_open
+diff --git a/m2clientsource/Client/UserInterface/PythonExchange.cpp b/m2clientsource/Client/UserInterface/PythonExchange.cpp
+index 2f1a9cb8..7c04c24d 100644
+--- a/m2clientsource/Client/UserInterface/PythonExchange.cpp
++++ b/m2clientsource/Client/UserInterface/PythonExchange.cpp
+@@ -119,7 +119,7 @@ void CPythonExchange::SetItemMetinSocketToSelf(int pos, int imetinpos, DWORD vnu
+ 	m_self.item_metin[pos][imetinpos] = vnum;
+ }
+ 
+-void CPythonExchange::SetItemAttributeToTarget(int pos, int iattrpos, BYTE byType, short sValue)
++void CPythonExchange::SetItemAttributeToTarget(int pos, int iattrpos, WORD byType, short sValue)
+ {
+ 	if (pos >= EXCHANGE_ITEM_MAX_NUM)
+ 		return;
+@@ -128,7 +128,7 @@ void CPythonExchange::SetItemAttributeToTarget(int pos, int iattrpos, BYTE byTyp
+ 	m_victim.item_attr[pos][iattrpos].sValue = sValue;
+ }
+ 
+-void CPythonExchange::SetItemAttributeToSelf(int pos, int iattrpos, BYTE byType, short sValue)
++void CPythonExchange::SetItemAttributeToSelf(int pos, int iattrpos, WORD byType, short sValue)
+ {
+ 	if (pos >= EXCHANGE_ITEM_MAX_NUM)
+ 		return;
+@@ -281,7 +281,7 @@ DWORD CPythonExchange::GetItemMetinSocketFromSelf(BYTE pos, int iMetinSocketPos)
+ 	return m_self.item_metin[pos][iMetinSocketPos];
+ }
+ 
+-void CPythonExchange::GetItemAttributeFromTarget(BYTE pos, int iAttrPos, BYTE * pbyType, short * psValue)
++void CPythonExchange::GetItemAttributeFromTarget(BYTE pos, int iAttrPos, WORD * pbyType, short * psValue)
+ {
+ 	if (pos >= EXCHANGE_ITEM_MAX_NUM)
+ 		return;
+@@ -290,7 +290,7 @@ void CPythonExchange::GetItemAttributeFromTarget(BYTE pos, int iAttrPos, BYTE *
+ 	*psValue = m_victim.item_attr[pos][iAttrPos].sValue;
+ }
+ 
+-void CPythonExchange::GetItemAttributeFromSelf(BYTE pos, int iAttrPos, BYTE * pbyType, short * psValue)
++void CPythonExchange::GetItemAttributeFromSelf(BYTE pos, int iAttrPos, WORD * pbyType, short * psValue)
+ {
+ 	if (pos >= EXCHANGE_ITEM_MAX_NUM)
+ 		return;
+diff --git a/m2clientsource/Client/UserInterface/PythonExchange.h b/m2clientsource/Client/UserInterface/PythonExchange.h
+index 7f7249d3..2a5ed5a7 100644
+--- a/m2clientsource/Client/UserInterface/PythonExchange.h
++++ b/m2clientsource/Client/UserInterface/PythonExchange.h
+@@ -89,8 +89,8 @@ class CPythonExchange : public CSingleton<CPythonExchange>
+ 		void			SetItemMetinSocketToTarget(int pos, int imetinpos, DWORD vnum);
+ 		void			SetItemMetinSocketToSelf(int pos, int imetinpos, DWORD vnum);
+ 
+-		void			SetItemAttributeToTarget(int pos, int iattrpos, BYTE byType, short sValue);
+-		void			SetItemAttributeToSelf(int pos, int iattrpos, BYTE byType, short sValue);
++		void			SetItemAttributeToTarget(int pos, int iattrpos, WORD byType, short sValue);
++		void			SetItemAttributeToSelf(int pos, int iattrpos, WORD byType, short sValue);
+ 
+ #ifdef ENABLE_CHANGE_LOOK_SYSTEM
+ 		void			SetItemTransmutation(int iPos, DWORD dwTransmutation, bool bSelf);
+@@ -121,8 +121,8 @@ class CPythonExchange : public CSingleton<CPythonExchange>
+ 		DWORD			GetItemMetinSocketFromTarget(BYTE pos, int iMetinSocketPos);
+ 		DWORD			GetItemMetinSocketFromSelf(BYTE pos, int iMetinSocketPos);
+ 
+-		void			GetItemAttributeFromTarget(BYTE pos, int iAttrPos, BYTE * pbyType, short * psValue);
+-		void			GetItemAttributeFromSelf(BYTE pos, int iAttrPos, BYTE * pbyType, short * psValue);
++		void			GetItemAttributeFromTarget(BYTE pos, int iAttrPos, WORD * pbyType, short * psValue);
++		void			GetItemAttributeFromSelf(BYTE pos, int iAttrPos, WORD * pbyType, short * psValue);
+ 
+ 		void			SetAcceptToTarget(BYTE Accept);
+ 		void			SetAcceptToSelf(BYTE Accept);
+diff --git a/m2clientsource/Client/UserInterface/PythonExchangeModule.cpp b/m2clientsource/Client/UserInterface/PythonExchangeModule.cpp
+index db206f48..d7506f9e 100644
+--- a/m2clientsource/Client/UserInterface/PythonExchangeModule.cpp
++++ b/m2clientsource/Client/UserInterface/PythonExchangeModule.cpp
+@@ -137,7 +137,7 @@ PyObject * exchangeGetItemAttributeFromTarget(PyObject * poTarget, PyObject * po
+ 	if (!PyTuple_GetInteger(poArgs, 1, &iAttrSlotPos))
+ 		return Py_BuildException();
+ 
+-	BYTE byType;
++	WORD byType;
+ 	short sValue;
+ 	CPythonExchange::Instance().GetItemAttributeFromTarget(pos, iAttrSlotPos, &byType, &sValue);
+ 
+@@ -153,7 +153,7 @@ PyObject * exchangeGetItemAttributeFromSelf(PyObject * poTarget, PyObject * poAr
+ 	if (!PyTuple_GetInteger(poArgs, 1, &iAttrSlotPos))
+ 		return Py_BuildException();
+ 
+-	BYTE byType;
++	WORD byType;
+ 	short sValue;
+ 	CPythonExchange::Instance().GetItemAttributeFromSelf(pos, iAttrSlotPos, &byType, &sValue);
+ 
+diff --git a/m2clientsource/Client/UserInterface/PythonItemModule.cpp b/m2clientsource/Client/UserInterface/PythonItemModule.cpp
+index 1cc8c351..e2c109f6 100644
+--- a/m2clientsource/Client/UserInterface/PythonItemModule.cpp
++++ b/m2clientsource/Client/UserInterface/PythonItemModule.cpp
+@@ -594,7 +594,7 @@ PyObject *itemGetApplyPoint(PyObject *poSelf, PyObject *poArgs)
+ 	if (!PyTuple_GetInteger(poArgs, 0, &applyType))
+ 		return Py_BadArgument();
+ 
+-	return Py_BuildValue("i", ApplyTypeToPointType((BYTE)applyType));
++	return Py_BuildValue("i", ApplyTypeToPointType((WORD)applyType));
+ }
+ #endif
+ 
+diff --git a/m2clientsource/Client/UserInterface/PythonPlayer.cpp b/m2clientsource/Client/UserInterface/PythonPlayer.cpp
+index cb93312a..1d4c5f27 100644
+--- a/m2clientsource/Client/UserInterface/PythonPlayer.cpp
++++ b/m2clientsource/Client/UserInterface/PythonPlayer.cpp
+@@ -863,7 +863,7 @@ DWORD CPythonPlayer::GetItemMetinSocket(TItemPos Cell, DWORD dwMetinSocketIndex)
+ 	return GetItemData(Cell)->alSockets[dwMetinSocketIndex];
+ }
+ 
+-void CPythonPlayer::GetItemAttribute(TItemPos Cell, DWORD dwAttrSlotIndex, BYTE * pbyType, short * psValue)
++void CPythonPlayer::GetItemAttribute(TItemPos Cell, DWORD dwAttrSlotIndex, WORD * pbyType, short * psValue)
+ {
+ 	*pbyType = 0;
+ 	*psValue = 0;
+@@ -966,7 +966,7 @@ void CPythonPlayer::SetItemMetinSocket(TItemPos Cell, DWORD dwMetinSocketIndex,
+ 	(const_cast <TItemData *>(GetItemData(Cell)))->alSockets[dwMetinSocketIndex] = dwMetinNumber;
+ }
+ 
+-void CPythonPlayer::SetItemAttribute(TItemPos Cell, DWORD dwAttrIndex, BYTE byType, short sValue)
++void CPythonPlayer::SetItemAttribute(TItemPos Cell, DWORD dwAttrIndex, WORD byType, short sValue)
+ {
+ 	if (!Cell.IsValidCell())
+ 		return;
+diff --git a/m2clientsource/Client/UserInterface/PythonPlayer.h b/m2clientsource/Client/UserInterface/PythonPlayer.h
+index 987e8153..3150f1a5 100644
+--- a/m2clientsource/Client/UserInterface/PythonPlayer.h
++++ b/m2clientsource/Client/UserInterface/PythonPlayer.h
+@@ -321,7 +321,7 @@ class CPythonPlayer : public CSingleton<CPythonPlayer>, public IAbstractPlayer
+ 		const TItemData * GetItemData(TItemPos Cell) const;
+ 		void	SetItemCount(TItemPos Cell, BYTE byCount);
+ 		void	SetItemMetinSocket(TItemPos Cell, DWORD dwMetinSocketIndex, DWORD dwMetinNumber);
+-		void	SetItemAttribute(TItemPos Cell, DWORD dwAttrIndex, BYTE byType, short sValue);
++		void	SetItemAttribute(TItemPos Cell, DWORD dwAttrIndex, WORD byType, short sValue);
+ 		DWORD	GetItemIndex(TItemPos Cell);
+ // #ifdef ENABLE_GROWTH_PET_SYSTEM
+ 		int		GetItemSlotIndex(DWORD dwVnum);
+@@ -337,7 +337,7 @@ class CPythonPlayer : public CSingleton<CPythonPlayer>, public IAbstractPlayer
+ 		DWORD	GetItemCount(TItemPos Cell);
+ 		DWORD	GetItemCountByVnum(DWORD dwVnum);
+ 		DWORD	GetItemMetinSocket(TItemPos Cell, DWORD dwMetinSocketIndex);
+-		void	GetItemAttribute(TItemPos Cell, DWORD dwAttrSlotIndex, BYTE * pbyType, short * psValue);
++		void	GetItemAttribute(TItemPos Cell, DWORD dwAttrSlotIndex, WORD * pbyType, short * psValue);
+ 
+ #ifdef ENABLE_CHANGE_LOOK_SYSTEM
+ 		void	SetItemTransmutation(TItemPos itemPos, DWORD dwVnum);
+diff --git a/m2clientsource/Client/UserInterface/PythonPlayerModule.cpp b/m2clientsource/Client/UserInterface/PythonPlayerModule.cpp
+index d1775ad1..68b8ba4f 100644
+--- a/m2clientsource/Client/UserInterface/PythonPlayerModule.cpp
++++ b/m2clientsource/Client/UserInterface/PythonPlayerModule.cpp
+@@ -996,7 +996,7 @@ PyObject * playerGetItemAttribute(PyObject* poSelf, PyObject* poArgs)
+ 	default:
+ 		return Py_BuildException();
+ 	}
+-	BYTE byType;
++	WORD byType;
+ 	short sValue;
+ 	CPythonPlayer::Instance().GetItemAttribute(Cell, iAttributeSlotIndex, &byType, &sValue);
+ 
+diff --git a/m2clientsource/Client/UserInterface/StdAfx.h b/m2clientsource/Client/UserInterface/StdAfx.h
+index 1756827e..1f5847a5 100644
+--- a/m2clientsource/Client/UserInterface/StdAfx.h
++++ b/m2clientsource/Client/UserInterface/StdAfx.h
+@@ -49,7 +49,7 @@ extern DWORD __DEFAULT_CODE_PAGE__;
+ 
+ enum
+ {
+-	POINT_MAX_NUM = 255,
++	POINT_MAX_NUM = 500,
+ 	CHARACTER_NAME_MAX_LEN = 24, // when changed,Make changes @ PythonNonPlayer.h -> TABLE_NAME_MAX_LEN
+ 	PLAYER_NAME_MAX_LEN = 12,
+ #ifdef ENABLE_OFFLINESHOP_SYSTEM
+diff --git a/m2source/Server/common/length.h b/m2source/Server/common/length.h
+index a50cca04..1b3a0031 100644
+--- a/m2source/Server/common/length.h
++++ b/m2source/Server/common/length.h
+@@ -74,7 +74,7 @@ enum EMisc
+ 
+ 	MOB_SKILL_MAX_NUM = 5,
+ 
+-	POINT_MAX_NUM = 255,
++	POINT_MAX_NUM = 500,
+ 	DRAGON_SOUL_BOX_SIZE = 32,
+ 	DRAGON_SOUL_BOX_COLUMN_NUM = 8,
+ 	DRAGON_SOUL_BOX_ROW_NUM = DRAGON_SOUL_BOX_SIZE / DRAGON_SOUL_BOX_COLUMN_NUM,
+diff --git a/m2source/Server/common/tables.h b/m2source/Server/common/tables.h
+index 43e5ba7c..86cfcc11 100644
+--- a/m2source/Server/common/tables.h
++++ b/m2source/Server/common/tables.h
+@@ -448,7 +448,7 @@ typedef struct SPacketDGCreateSuccess
+ 
+ typedef struct TPlayerItemAttribute
+ {
+-	BYTE	bType;
++	WORD	bType;
+ 	short	sValue;
+ } TPlayerItemAttribute;
+ 
+@@ -743,7 +743,7 @@ typedef struct SItemLimit
+ 
+ typedef struct SItemApply
+ {
+-	BYTE	bType;
++	WORD	bType;
+ 	long	lValue;
+ } TItemApply;
+ 
+@@ -972,7 +972,7 @@ typedef struct SPacketDGLoginAlready
+ typedef struct TPacketAffectElement
+ {
+ 	DWORD	dwType;
+-	BYTE	bApplyOn;
++	WORD	bApplyOn;
+ 	long	lApplyValue;
+ 	DWORD	dwFlag;
+ 	long	lDuration;
+@@ -989,7 +989,7 @@ typedef struct SPacketGDRemoveAffect
+ {
+ 	DWORD	dwPID;
+ 	DWORD	dwType;
+-	BYTE	bApplyOn;
++	WORD	bApplyOn;
+ } TPacketGDRemoveAffect;
+ 
+ typedef struct SPacketGDHighscore
+diff --git a/m2source/Server/game/src/DragonSoul.cpp b/m2source/Server/game/src/DragonSoul.cpp
+index 8fc6c5db..56e78c0c 100644
+--- a/m2source/Server/game/src/DragonSoul.cpp
++++ b/m2source/Server/game/src/DragonSoul.cpp
+@@ -183,7 +183,7 @@ bool DSManager::RefreshItemAttributes(LPITEM pDS)
+ 	for (int i = 0; i < n; i++)
+ 	{
+ 		const SApply& basic_apply = vec_basic_applys[i];
+-		BYTE bType = basic_apply.apply_type;
++		WORD bType = basic_apply.apply_type;
+ 		short sValue = (short)(ceil((float)basic_apply.apply_value * fWeight - 0.01f));
+ 
+ 		pDS->SetForceAttribute(i, bType, sValue);
+@@ -191,7 +191,7 @@ bool DSManager::RefreshItemAttributes(LPITEM pDS)
+ 
+ 	for (int i = DRAGON_SOUL_ADDITIONAL_ATTR_START_IDX; i < ITEM_ATTRIBUTE_MAX_NUM; i++)
+ 	{
+-		BYTE bType = pDS->GetAttributeType(i);
++		WORD bType = pDS->GetAttributeType(i);
+ 		short sValue = 0;
+ 		if (APPLY_NONE == bType)
+ 			continue;
+@@ -252,7 +252,7 @@ bool DSManager::PutAttributes(LPITEM pDS)
+ 	for (int i = 0; i < n; i++)
+ 	{
+ 		const SApply& basic_apply = vec_basic_applys[i];
+-		BYTE bType = basic_apply.apply_type;
++		WORD bType = basic_apply.apply_type;
+ 		short sValue = (short)(ceil((float)basic_apply.apply_value * fWeight - 0.01f));
+ 
+ 		pDS->SetForceAttribute(i, bType, sValue);
+diff --git a/m2source/Server/game/src/affect.h b/m2source/Server/game/src/affect.h
+index fb621cc1..ea2dd231 100644
+--- a/m2source/Server/game/src/affect.h
++++ b/m2source/Server/game/src/affect.h
+@@ -5,7 +5,7 @@ class CAffect
+ {
+ 	public:
+ 		DWORD	dwType;
+-		BYTE    bApplyOn;
++		WORD    bApplyOn;
+ 		long    lApplyValue;
+ 		DWORD   dwFlag;
+ 		long	lDuration;
+diff --git a/m2source/Server/game/src/battle.h b/m2source/Server/game/src/battle.h
+index b01d1f30..1dab1428 100644
+--- a/m2source/Server/game/src/battle.h
++++ b/m2source/Server/game/src/battle.h
+@@ -33,10 +33,10 @@ extern void	NormalAttackAffect(LPCHARACTER pkAttacker, LPCHARACTER pkVictim);
+ 
+ inline void AttackAffect(LPCHARACTER pkAttacker,
+ 		LPCHARACTER pkVictim,
+-		BYTE att_point,
++		WORD att_point,
+ 		DWORD immune_flag,
+ 		DWORD affect_idx,
+-		BYTE affect_point,
++		WORD affect_point,
+ 		long affect_amount,
+ 		DWORD affect_flag,
+ 		int time,
+@@ -64,7 +64,7 @@ inline void SkillAttackAffect(LPCHARACTER pkVictim,
+ 		int success_pct,
+ 		DWORD immune_flag,
+ 		DWORD affect_idx,
+-		BYTE affect_point,
++		WORD affect_point,
+ 		long affect_amount,
+ 		DWORD affect_flag,
+ 		int time,
+diff --git a/m2source/Server/game/src/buff_on_attributes.cpp b/m2source/Server/game/src/buff_on_attributes.cpp
+index 4b3496dd..4532a883 100644
+--- a/m2source/Server/game/src/buff_on_attributes.cpp
++++ b/m2source/Server/game/src/buff_on_attributes.cpp
+@@ -5,7 +5,7 @@
+ #include "buff_on_attributes.h"
+ #include <algorithm>
+ 
+-CBuffOnAttributes::CBuffOnAttributes(LPCHARACTER pOwner, BYTE point_type, std::vector <BYTE>* p_vec_buff_wear_targets)
++CBuffOnAttributes::CBuffOnAttributes(LPCHARACTER pOwner, WORD point_type, std::vector <BYTE>* p_vec_buff_wear_targets)
+ :	m_pBuffOwner(pOwner), m_bPointType(point_type), m_p_vec_buff_wear_targets(p_vec_buff_wear_targets)
+ {
+ 	Initialize();
+diff --git a/m2source/Server/game/src/buff_on_attributes.h b/m2source/Server/game/src/buff_on_attributes.h
+index c55e1d18..263a1f09 100644
+--- a/m2source/Server/game/src/buff_on_attributes.h
++++ b/m2source/Server/game/src/buff_on_attributes.h
+@@ -6,7 +6,7 @@ class CHARACTER;
+ class CBuffOnAttributes
+ {
+ public:
+-	CBuffOnAttributes(LPCHARACTER pOwner, BYTE m_point_type, std::vector <BYTE>* vec_buff_targets);
++	CBuffOnAttributes(LPCHARACTER pOwner, WORD m_point_type, std::vector <BYTE>* vec_buff_targets);
+ 	~CBuffOnAttributes();
+ 
+ 	void RemoveBuffFromItem(LPITEM pItem);
+@@ -19,7 +19,7 @@ public:
+ 	void Initialize();
+ private:
+ 	LPCHARACTER m_pBuffOwner;
+-	BYTE m_bPointType;
++	WORD m_bPointType;
+ 	BYTE m_bBuffValue;
+ 	std::vector <BYTE>* m_p_vec_buff_wear_targets;
+ 
+diff --git a/m2source/Server/game/src/char.cpp b/m2source/Server/game/src/char.cpp
+index 8a9eb705..cddd1046 100644
+--- a/m2source/Server/game/src/char.cpp
++++ b/m2source/Server/game/src/char.cpp
+@@ -87,7 +87,7 @@
+ #include "CompanionSystem.h"
+ #endif
+ 
+-extern const BYTE g_aBuffOnAttrPoints;
++extern const WORD g_aBuffOnAttrPoints;
+ extern bool RaceToJob(unsigned race, unsigned *ret_job);
+ 
+ extern bool IS_SUMMONABLE_ZONE(int map_index); // char_item.cpp
+@@ -3567,17 +3567,17 @@ void CHARACTER::SendMovePacket(BYTE bFunc, BYTE bArg, DWORD x, DWORD y, DWORD dw
+ 	PacketView(&pack, sizeof(TPacketGCMove), this);
+ }
+ 
+-int CHARACTER::GetRealPoint(BYTE type) const
++int CHARACTER::GetRealPoint(WORD type) const
+ {
+ 	return m_points.points[type];
+ }
+ 
+-void CHARACTER::SetRealPoint(BYTE type, int val)
++void CHARACTER::SetRealPoint(WORD type, int val)
+ {
+ 	m_points.points[type] = val;
+ }
+ 
+-int CHARACTER::GetPolymorphPoint(BYTE type) const
++int CHARACTER::GetPolymorphPoint(WORD type) const
+ {
+ 	if (IsPolymorphed() && !IsPolyMaintainStat())
+ 	{
+@@ -3609,7 +3609,7 @@ int CHARACTER::GetPolymorphPoint(BYTE type) const
+ 	return GetPoint(type);
+ }
+ 
+-int CHARACTER::GetPoint(BYTE type) const
++int CHARACTER::GetPoint(WORD type) const
+ {
+ 	if (type >= POINT_MAX_NUM)
+ 	{
+@@ -3634,7 +3634,7 @@ int CHARACTER::GetPoint(BYTE type) const
+ 	return (val);
+ }
+ 
+-int CHARACTER::GetLimitPoint(BYTE type) const
++int CHARACTER::GetLimitPoint(WORD type) const
+ {
+ 	if (type >= POINT_MAX_NUM)
+ 	{
+@@ -3692,7 +3692,7 @@ int CHARACTER::GetLimitPoint(BYTE type) const
+ 	return (val);
+ }
+ 
+-void CHARACTER::SetPoint(BYTE type, int val)
++void CHARACTER::SetPoint(WORD type, int val)
+ {
+ 	if (type >= POINT_MAX_NUM)
+ 	{
+@@ -3727,7 +3727,7 @@ void CHARACTER::CheckMaximumPoints()
+ 		PointChange(POINT_SP, GetMaxSP() - GetSP());
+ }
+ 
+-void CHARACTER::PointChange(BYTE type, int amount, bool bAmount, bool bBroadcast)
++void CHARACTER::PointChange(WORD type, int amount, bool bAmount, bool bBroadcast)
+ {
+ 	int val = 0;
+ 
+@@ -4448,7 +4448,7 @@ void CHARACTER::PointChange(BYTE type, int amount, bool bAmount, bool bBroadcast
+ 	}
+ }
+ 
+-void CHARACTER::ApplyPoint(BYTE bApplyType, int iVal)
++void CHARACTER::ApplyPoint(WORD bApplyType, int iVal)
+ {
+ 	switch (bApplyType)
+ 	{
+diff --git a/m2source/Server/game/src/char.h b/m2source/Server/game/src/char.h
+index 277459f8..1c14fba1 100644
+--- a/m2source/Server/game/src/char.h
++++ b/m2source/Server/game/src/char.h
+@@ -862,13 +862,13 @@ public:
+ 
+ 	int GetHPPct() const;
+ 
+-	void SetRealPoint(BYTE idx, int val);
+-	int GetRealPoint(BYTE idx) const;
++	void SetRealPoint(WORD idx, int val);
++	int GetRealPoint(WORD idx) const;
+ 
+-	void SetPoint(BYTE idx, int val);
+-	int GetPoint(BYTE idx) const;
+-	int GetLimitPoint(BYTE idx) const;
+-	int GetPolymorphPoint(BYTE idx) const;
++	void SetPoint(WORD idx, int val);
++	int GetPoint(WORD idx) const;
++	int GetLimitPoint(WORD idx) const;
++	int GetPolymorphPoint(WORD idx) const;
+ 
+ 	const TMobTable &GetMobTable() const;
+ 	BYTE GetMobRank() const;
+@@ -911,9 +911,9 @@ public:
+ 
+ 	void ComputePoints();
+ 	void ComputeBattlePoints();
+-	void PointChange(BYTE type, int amount, bool bAmount = false, bool bBroadcast = false);
++	void PointChange(WORD type, int amount, bool bAmount = false, bool bBroadcast = false);
+ 	void PointsPacket();
+-	void ApplyPoint(BYTE bApplyType, int iVal);
++	void ApplyPoint(WORD bApplyType, int iVal);
+ 	void CheckMaximumPoints();
+ 
+ 	bool Show(long lMapIndex, long x, long y, long z = LONG_MAX, bool bShowSpawnMotion = false);
+@@ -1096,7 +1096,7 @@ public:
+ #endif
+ 	);
+ 	void ComputeAffect(CAffect *pkAff, bool bAdd);
+-	bool AddAffect(DWORD dwType, BYTE bApplyOn, long lApplyValue, DWORD dwFlag, long lDuration, long lSPCost, bool bOverride, bool IsCube = false);
++	bool AddAffect(DWORD dwType, WORD bApplyOn, long lApplyValue, DWORD dwFlag, long lDuration, long lSPCost, bool bOverride, bool IsCube = false);
+ 	void RefreshAffect();
+ 	bool RemoveAffect(DWORD dwType);
+ 	bool IsAffectFlag(DWORD dwAff) const;
+@@ -1114,7 +1114,7 @@ public:
+ 	void RemoveGoodAffect();
+ 	void RemoveBadAffect();
+ 
+-	CAffect *FindAffect(DWORD dwType, BYTE bApply = APPLY_NONE) const;
++	CAffect *FindAffect(DWORD dwType, WORD bApply = APPLY_NONE) const;
+ #ifdef ENABLE_PLAYER_AFFECT_REMOVE
+ 	CAffect *FindAffectByFlag(DWORD dwFlag) const;
+ #endif
+@@ -2197,10 +2197,10 @@ public:
+ 	void BuffOnAttr_RemoveBuffsFromItem(LPITEM pItem);
+ 
+ private:
+-	void BuffOnAttr_ValueChange(BYTE bType, BYTE bOldValue, BYTE bNewValue);
++	void BuffOnAttr_ValueChange(WORD bType, BYTE bOldValue, BYTE bNewValue);
+ 	void BuffOnAttr_ClearAll();
+ 
+-	typedef std::map<BYTE, CBuffOnAttributes *> TMapBuffOnAttrs;
++	typedef std::map<WORD, CBuffOnAttributes *> TMapBuffOnAttrs;
+ 	TMapBuffOnAttrs m_map_buff_on_attrs;
+ 
+ public:
+diff --git a/m2source/Server/game/src/char_affect.cpp b/m2source/Server/game/src/char_affect.cpp
+index 681845b1..01b0fad4 100644
+--- a/m2source/Server/game/src/char_affect.cpp
++++ b/m2source/Server/game/src/char_affect.cpp
+@@ -21,7 +21,7 @@
+ #define IS_NO_SAVE_AFFECT(type) ((type) == AFFECT_WAR_FLAG || (type) == AFFECT_REVIVE_INVISIBLE || ((type) >= AFFECT_PREMIUM_START && (type) <= AFFECT_PREMIUM_END) || (type) == AFFECT_MOUNT_BONUS) // @fixme156 added MOUNT_BONUS (if the game core crashes, the bonus would double if present in player.affect)
+ #define IS_NO_CLEAR_ON_DEATH_AFFECT(type) ((type) == AFFECT_BLOCK_CHAT || ((type) >= 500 && (type) < 600))
+ 
+-void SendAffectRemovePacket(LPDESC d, DWORD pid, DWORD type, BYTE point)
++void SendAffectRemovePacket(LPDESC d, DWORD pid, DWORD type, WORD point)
+ {
+ 	TPacketGCAffectRemove ptoc;
+ 	ptoc.bHeader	= HEADER_GC_AFFECT_REMOVE;
+@@ -50,7 +50,7 @@ void SendAffectAddPacket(LPDESC d, CAffect * pkAff)
+ }
+ ////////////////////////////////////////////////////////////////////
+ // Affect
+-CAffect * CHARACTER::FindAffect(DWORD dwType, BYTE bApply) const
++CAffect * CHARACTER::FindAffect(DWORD dwType, WORD bApply) const
+ {
+ 	itertype(m_list_pkAffect) it = m_list_pkAffect.begin();
+ 
+@@ -589,7 +589,7 @@ void CHARACTER::LoadAffect(DWORD dwCount, TPacketAffectElement * pElements)
+ 	// @fixme118 END
+ }
+ 
+-bool CHARACTER::AddAffect(DWORD dwType, BYTE bApplyOn, long lApplyValue, DWORD dwFlag, long lDuration, long lSPCost, bool bOverride, bool IsCube )
++bool CHARACTER::AddAffect(DWORD dwType, WORD bApplyOn, long lApplyValue, DWORD dwFlag, long lDuration, long lSPCost, bool bOverride, bool IsCube )
+ {
+ 	// CHAT_BLOCK
+ 	if (dwType == AFFECT_BLOCK_CHAT && lDuration > 1)
+diff --git a/m2source/Server/game/src/char_item.cpp b/m2source/Server/game/src/char_item.cpp
+index 23b8c7a8..e537f052 100644
+--- a/m2source/Server/game/src/char_item.cpp
++++ b/m2source/Server/game/src/char_item.cpp
+@@ -77,7 +77,7 @@ const int ITEM_BROKEN_METIN_VNUM = 28960;
+ const char CHARACTER::msc_szLastChangeItemAttrFlag[] = "Item.LastChangeItemAttr";
+ // const char CHARACTER::msc_szChangeItemAttrCycleFlag[] = "change_itemattr_cycle";
+ // END_OF_CHANGE_ITEM_ATTRIBUTES
+-const BYTE g_aBuffOnAttrPoints[] = { POINT_ENERGY, POINT_COSTUME_ATTR_BONUS };
++const WORD g_aBuffOnAttrPoints[] = { POINT_ENERGY, POINT_COSTUME_ATTR_BONUS };
+ 
+ struct FFindStone
+ {
+@@ -8165,7 +8165,7 @@ void CHARACTER::BuffOnAttr_ClearAll()
+ 	}
+ }
+ 
+-void CHARACTER::BuffOnAttr_ValueChange(BYTE bType, BYTE bOldValue, BYTE bNewValue)
++void CHARACTER::BuffOnAttr_ValueChange(WORD bType, BYTE bOldValue, BYTE bNewValue)
+ {
+ 	TMapBuffOnAttrs::iterator it = m_map_buff_on_attrs.find(bType);
+ 
+diff --git a/m2source/Server/game/src/char_skill.cpp b/m2source/Server/game/src/char_skill.cpp
+index e13cd37f..75d8f5ee 100644
+--- a/m2source/Server/game/src/char_skill.cpp
++++ b/m2source/Server/game/src/char_skill.cpp
+@@ -1520,7 +1520,7 @@ struct FuncSplashDamage
+ 
+ struct FuncSplashAffect
+ {
+-	FuncSplashAffect(LPCHARACTER ch, int x, int y, int iDist, DWORD dwVnum, BYTE bPointOn, int iAmount, DWORD dwAffectFlag, int iDuration, int iSPCost, bool bOverride, int iMaxHit)
++	FuncSplashAffect(LPCHARACTER ch, int x, int y, int iDist, DWORD dwVnum, WORD bPointOn, int iAmount, DWORD dwAffectFlag, int iDuration, int iSPCost, bool bOverride, int iMaxHit)
+ 	{
+ 		m_x = x;
+ 		m_y = y;
+@@ -1571,7 +1571,7 @@ struct FuncSplashAffect
+ 	int m_y;
+ 	int m_iDist;
+ 	DWORD m_dwVnum;
+-	BYTE m_bPointOn;
++	WORD m_bPointOn;
+ 	int m_iAmount;
+ 	DWORD m_dwAffectFlag;
+ 	int m_iDuration;
+diff --git a/m2source/Server/game/src/cmd_general.cpp b/m2source/Server/game/src/cmd_general.cpp
+index 9a9fda21..7f32559f 100644
+--- a/m2source/Server/game/src/cmd_general.cpp
++++ b/m2source/Server/game/src/cmd_general.cpp
+@@ -738,7 +738,7 @@ ACMD(do_stat)
+ 	if (ch->GetPoint(POINT_STAT) <= 0)
+ 		return;
+ 
+-	BYTE idx = 0;
++	WORD idx = 0;
+ 
+ 	if (!strcmp(arg1, "st"))
+ 		idx = POINT_ST;
+diff --git a/m2source/Server/game/src/cmd_gm.cpp b/m2source/Server/game/src/cmd_gm.cpp
+index 53c1c268..b9d2ab2e 100644
+--- a/m2source/Server/game/src/cmd_gm.cpp
++++ b/m2source/Server/game/src/cmd_gm.cpp
+@@ -3856,7 +3856,7 @@ ACMD(do_affect_remove)
+ 
+ 	DWORD	type = 0;
+ 	str_to_number(type, arg1);
+-	BYTE	point = 0;
++	WORD	point = 0;
+ 	str_to_number(point, arg2);
+ 	while ((af = ch->FindAffect(type, point)))
+ 	{
+diff --git a/m2source/Server/game/src/constants.h b/m2source/Server/game/src/constants.h
+index 0f299bb9..5153c520 100644
+--- a/m2source/Server/game/src/constants.h
++++ b/m2source/Server/game/src/constants.h
+@@ -51,7 +51,7 @@ typedef struct __coord
+ 
+ typedef struct SApplyInfo
+ {
+-	BYTE	bPointType;                          // APPLY -> POINT
++	WORD	bPointType;	// APPLY -> POINT
+ } TApplyInfo;
+ 
+ enum {
+diff --git a/m2source/Server/game/src/guild.cpp b/m2source/Server/game/src/guild.cpp
+index aa989927..d35a1eb1 100644
+--- a/m2source/Server/game/src/guild.cpp
++++ b/m2source/Server/game/src/guild.cpp
+@@ -1399,7 +1399,7 @@ static DWORD __guild_levelup_exp(int level)
+ 	return guild_exp_table2[level];
+ }
+ 
+-void CGuild::GuildPointChange(BYTE type, int amount, bool save)
++void CGuild::GuildPointChange(WORD type, int amount, bool save)
+ {
+ 	switch (type)
+ 	{
+diff --git a/m2source/Server/game/src/guild.h b/m2source/Server/game/src/guild.h
+index 7dd37bfd..fa4e47cc 100644
+--- a/m2source/Server/game/src/guild.h
++++ b/m2source/Server/game/src/guild.h
+@@ -253,7 +253,7 @@ class CGuild
+ 		void		SendSkillInfoPacket(LPCHARACTER ch) const;
+ 		void		ComputeGuildPoints();
+ 
+-		void		GuildPointChange( BYTE type, int amount, bool save = false );
++		void		GuildPointChange(WORD type, int amount, bool save = false );
+ 
+ 		void		UpdateSkill(BYTE grade, BYTE* skill_levels);
+ 		void		SendDBSkillUpdate(int amount = 0);
+diff --git a/m2source/Server/game/src/item.cpp b/m2source/Server/game/src/item.cpp
+index aba71da3..dcc3fda5 100644
+--- a/m2source/Server/game/src/item.cpp
++++ b/m2source/Server/game/src/item.cpp
+@@ -2365,7 +2365,7 @@ bool CItem::CheckItemUseLevel(int nLevel)
+ 	return true;
+ }
+ 
+-long CItem::FindApplyValue(BYTE bApplyType)
++long CItem::FindApplyValue(WORD bApplyType)
+ {
+ 	if (m_pProto == NULL)
+ 		return 0;
+diff --git a/m2source/Server/game/src/item.h b/m2source/Server/game/src/item.h
+index 10cd5d5b..14b442ae 100644
+--- a/m2source/Server/game/src/item.h
++++ b/m2source/Server/game/src/item.h
+@@ -20,7 +20,7 @@ class CItem : public CEntity
+ 
+ 		bool		IsPCBangItem();
+ 
+-		long		FindApplyValue(BYTE bApplyType);
++		long		FindApplyValue(WORD bApplyType);
+ 
+ 		bool		IsStackable()		{ return (GetFlag() & ITEM_FLAG_STACKABLE)?true:false; }
+ 
+@@ -123,17 +123,17 @@ class CItem : public CEntity
+ 		const TPlayerItemAttribute* GetAttributes()		{ return m_aAttr;	}
+ 		const TPlayerItemAttribute& GetAttribute(int i)	{ return m_aAttr[i];	}
+ 
+-		BYTE		GetAttributeType(int i)	{ return m_aAttr[i].bType;	}
++		WORD		GetAttributeType(int i)	{ return m_aAttr[i].bType;	}
+ 		short		GetAttributeValue(int i){ return m_aAttr[i].sValue;	}
+ 
+ 		void		SetAttributes(const TPlayerItemAttribute* c_pAttribute);
+ 
+-		int		FindAttribute(BYTE bType);
++		int			FindAttribute(WORD bType);
+ 		bool		RemoveAttributeAt(int index);
+-		bool		RemoveAttributeType(BYTE bType);
++		bool		RemoveAttributeType(WORD bType);
+ 
+-		bool		HasAttr(BYTE bApply);
+-		bool		HasRareAttr(BYTE bApply);
++		bool		HasAttr(WORD bApply);
++		bool		HasRareAttr(WORD bApply);
+ 
+ 		void		SetDestroyEvent(LPEVENT pkEvent);
+ 		void		StartDestroyEvent(int iSec=300);
+@@ -183,7 +183,7 @@ class CItem : public CEntity
+ 		void		ClearAttribute();
+ 		void		ChangeAttribute(const int* aiChangeProb=NULL);
+ 		void		AddAttribute();
+-		void		AddAttribute(BYTE bType, short sValue);
++		void		AddAttribute(WORD bType, short sValue);
+ 
+ 		void		ApplyAddon(int iAddonType);
+ 
+@@ -225,29 +225,29 @@ class CItem : public CEntity
+ 
+ #ifdef ENABLE_ITEM_ATTR_UPDATE
+ 	public:
+-		void		SetAttribute(int i, BYTE bType, short sValue, bool bNoLog = false);
++		void		SetAttribute(int i, WORD bType, short sValue, bool bNoLog = false);
+ #else
+ 	private:
+-		void		SetAttribute(int i, BYTE bType, short sValue);
++		void		SetAttribute(int i, WORD bType, short sValue);
+ #endif
+ 	public:
+-		void		SetForceAttribute(int i, BYTE bType, short sValue);
++		void		SetForceAttribute(int i, WORD bType, short sValue);
+ 
+ 	protected:
+ 		bool		EquipEx(bool is_equip);
+ 		bool		Unequip();
+ 
+-		void		AddAttr(BYTE bApply, BYTE bLevel);
++		void		AddAttr(WORD bApply, WORD bLevel);
+ 		void		PutAttribute(const int * aiAttrPercentTable);
+-		void		PutAttributeWithLevel(BYTE bLevel);
++		void		PutAttributeWithLevel(WORD bLevel);
+ 
+ 	public:
+ 		bool		AddRareAttribute2(const int * aiAttrPercentTable = NULL);
+ 		bool		ChangeRareAttribute2();
+ 	protected:
+-		void		AddRareAttr(BYTE bApply, BYTE bLevel);
++		void		AddRareAttr(WORD bApply, WORD bLevel);
+ 		void		PutRareAttribute(const int * aiAttrPercentTable);
+-		void		PutRareAttributeWithLevel(BYTE bLevel);
++		void		PutRareAttributeWithLevel(WORD bLevel);
+ 
+ 	protected:
+ 		friend class CInputDB;
+@@ -361,11 +361,11 @@ class CItem : public CEntity
+ 
+ #ifdef ENABLE_DIRECT_ENCHANT_ATTR
+     public:
+-		bool		HasProtoAttr(BYTE bApply);
++		bool		HasProtoAttr(WORD bApply);
+ 		bool		IsEnchantable(LPITEM item);
+         std::vector<int> GetAvailableAttr();
+-        void		RemoveAttrByApply(BYTE bApply);
+-        WORD        GetAttrLevelValue(BYTE bApply, BYTE bLevel);
++        void		RemoveAttrByApply(WORD bApply);
++        WORD        GetAttrLevelValue(WORD bApply, WORD bLevel);
+ #endif
+ 
+ #ifdef ENABLE_ITEM_ATTR_UPDATE
+diff --git a/m2source/Server/game/src/item_attribute.cpp b/m2source/Server/game/src/item_attribute.cpp
+index 1421a99e..39bc3f42 100644
+--- a/m2source/Server/game/src/item_attribute.cpp
++++ b/m2source/Server/game/src/item_attribute.cpp
+@@ -104,7 +104,7 @@ int CItem::GetAttributeSetIndex()
+ 	return -1;
+ }
+ 
+-bool CItem::HasAttr(BYTE bApply)
++bool CItem::HasAttr(WORD bApply)
+ {
+ 	for (int i = 0; i < ITEM_APPLY_MAX_NUM; ++i)
+ 		if (m_pProto->aApplies[i].bType == bApply)
+@@ -117,7 +117,7 @@ bool CItem::HasAttr(BYTE bApply)
+ 	return false;
+ }
+ 
+-bool CItem::HasRareAttr(BYTE bApply)
++bool CItem::HasRareAttr(WORD bApply)
+ {
+ 	for (int i = 0; i < MAX_RARE_ATTR_NUM; ++i)
+ 		if (GetAttributeType(i + 5) == bApply)
+@@ -126,7 +126,7 @@ bool CItem::HasRareAttr(BYTE bApply)
+ 	return false;
+ }
+ 
+-void CItem::AddAttribute(BYTE bApply, short sValue)
++void CItem::AddAttribute(WORD bApply, short sValue)
+ {
+ 	if (HasAttr(bApply))
+ 		return;
+@@ -142,7 +142,7 @@ void CItem::AddAttribute(BYTE bApply, short sValue)
+ 	}
+ }
+ 
+-void CItem::AddAttr(BYTE bApply, BYTE bLevel)
++void CItem::AddAttr(WORD bApply, WORD bLevel)
+ {
+ 	if (HasAttr(bApply))
+ 		return;
+@@ -164,7 +164,7 @@ void CItem::AddAttr(BYTE bApply, BYTE bLevel)
+ 	}
+ }
+ 
+-void CItem::PutAttributeWithLevel(BYTE bLevel)
++void CItem::PutAttributeWithLevel(WORD bLevel)
+ {
+ 	int iAttributeSet = GetAttributeSetIndex();
+ 	if (iAttributeSet < 0)
+@@ -312,7 +312,7 @@ int CItem::GetAttributeCount()
+ 	return i;
+ }
+ 
+-int CItem::FindAttribute(BYTE bType)
++int CItem::FindAttribute(WORD bType)
+ {
+ 	for (int i = 0; i < MAX_NORM_ATTR_NUM; ++i)
+ 	{
+@@ -337,7 +337,7 @@ bool CItem::RemoveAttributeAt(int index)
+ 	return true;
+ }
+ 
+-bool CItem::RemoveAttributeType(BYTE bType)
++bool CItem::RemoveAttributeType(WORD bType)
+ {
+ 	int index = FindAttribute(bType);
+ 	return index != -1 && RemoveAttributeType(index);
+@@ -350,9 +350,9 @@ void CItem::SetAttributes(const TPlayerItemAttribute* c_pAttribute)
+ }
+ 
+ #ifdef ENABLE_ITEM_ATTR_UPDATE
+-void CItem::SetAttribute(int i, BYTE bType, short sValue, bool bNoLog)
++void CItem::SetAttribute(int i, WORD bType, short sValue, bool bNoLog)
+ #else
+-void CItem::SetAttribute(int i, BYTE bType, short sValue)
++void CItem::SetAttribute(int i, WORD bType, short sValue)
+ #endif
+ {
+ 	assert(i < MAX_NORM_ATTR_NUM);
+@@ -377,7 +377,7 @@ void CItem::SetAttribute(int i, BYTE bType, short sValue)
+ 	}
+ }
+ 
+-void CItem::SetForceAttribute(int i, BYTE bType, short sValue)
++void CItem::SetForceAttribute(int i, WORD bType, short sValue)
+ {
+ 	assert(i < ITEM_ATTRIBUTE_MAX_NUM);
+ 
+@@ -555,7 +555,7 @@ void CItem::PutRareAttribute(const int * aiAttrPercentTable)
+ 	PutRareAttributeWithLevel(i + 1);
+ }
+ 
+-void CItem::PutRareAttributeWithLevel(BYTE bLevel)
++void CItem::PutRareAttributeWithLevel(WORD bLevel)
+ {
+ 	int iAttributeSet = GetAttributeSetIndex();
+ 	if (iAttributeSet < 0)
+@@ -612,7 +612,7 @@ void CItem::PutRareAttributeWithLevel(BYTE bLevel)
+ 	AddRareAttr(attr_idx, bLevel);
+ }
+ 
+-void CItem::AddRareAttr(BYTE bApply, BYTE bLevel)
++void CItem::AddRareAttr(WORD bApply, WORD bLevel)
+ {
+ 	if (HasRareAttr(bApply))
+ 		return;
+@@ -635,7 +635,7 @@ void CItem::AddRareAttr(BYTE bApply, BYTE bLevel)
+ }
+ 
+ #ifdef ENABLE_DIRECT_ENCHANT_ATTR
+-bool CItem::HasProtoAttr(BYTE bApply)
++bool CItem::HasProtoAttr(WORD bApply)
+ {
+ 	for (int i = 0; i < ITEM_APPLY_MAX_NUM; ++i)
+ 		if (m_pProto->aApplies[i].bType == bApply)
+@@ -705,7 +705,7 @@ std::vector<int> CItem::GetAvailableAttr()
+     return avail;
+ }
+ 
+-void CItem::RemoveAttrByApply(BYTE bApply)
++void CItem::RemoveAttrByApply(WORD bApply)
+ {
+     bool bUpdated = false;
+     for(int i = 0; i < ITEM_ATTRIBUTE_MAX_NUM; ++i)
+@@ -721,7 +721,7 @@ void CItem::RemoveAttrByApply(BYTE bApply)
+         UpdatePacket();
+ }
+ 
+-WORD CItem::GetAttrLevelValue(BYTE bApply, BYTE bLevel)
++WORD CItem::GetAttrLevelValue(WORD bApply, WORD bLevel)
+ {
+ 	if (bLevel > 4)
+ 		return 0;
+diff --git a/m2source/Server/game/src/packet.h b/m2source/Server/game/src/packet.h
+index bafc1467..31f7d8e7 100644
+--- a/m2source/Server/game/src/packet.h
++++ b/m2source/Server/game/src/packet.h
+@@ -1248,7 +1248,7 @@ typedef struct packet_point_change
+ {
+ 	int header;
+ 	DWORD dwVID;
+-	BYTE type;
++	WORD type;
+ 	long amount;
+ 	long value;
+ } TPacketGCPointChange;
+@@ -2386,7 +2386,7 @@ typedef struct
+ {
+ 	BYTE bHeader;
+ 	DWORD dwType;
+-	BYTE bApplyOn;
++	WORD bApplyOn;
+ } TPacketGCAffectRemove;
+ 
+ typedef struct packet_lover_info
+diff --git a/m2source/Server/game/src/questlua_affect.cpp b/m2source/Server/game/src/questlua_affect.cpp
+index 45d17412..e212683f 100644
+--- a/m2source/Server/game/src/questlua_affect.cpp
++++ b/m2source/Server/game/src/questlua_affect.cpp
+@@ -21,7 +21,7 @@ namespace quest
+ 
+ 		CQuestManager & q = CQuestManager::instance();
+ 
+-		BYTE applyOn = (BYTE) lua_tonumber(L, 1);
++		WORD applyOn = (WORD) lua_tonumber(L, 1);
+ 
+ 		LPCHARACTER ch = q.GetCurrentCharacterPtr();
+ 
+@@ -86,7 +86,7 @@ namespace quest
+ 
+ 		CQuestManager & q = CQuestManager::instance();
+ 
+-		BYTE applyOn = (BYTE) lua_tonumber(L, 1);
++		WORD applyOn = (WORD) lua_tonumber(L, 1);
+ 
+ 		LPCHARACTER ch = q.GetCurrentCharacterPtr();
+ 
+@@ -158,7 +158,7 @@ namespace quest
+ 
+ 		CQuestManager & q = CQuestManager::instance();
+ 
+-		BYTE applyOn = (BYTE) lua_tonumber(L, 1);
++		WORD applyOn = (WORD) lua_tonumber(L, 1);
+ 
+ 		LPCHARACTER ch = q.GetCurrentCharacterPtr();
+ 
+@@ -186,7 +186,7 @@ namespace quest
+ 
+ 		CQuestManager & q = CQuestManager::instance();
+ 
+-		BYTE point_type = (BYTE) lua_tonumber(L, 1);
++		WORD point_type = (WORD) lua_tonumber(L, 1);
+ 
+ 		LPCHARACTER ch = q.GetCurrentCharacterPtr();
+ 
+@@ -210,7 +210,7 @@ namespace quest
+ 
+ 		if ( ch != NULL )
+ 		{
+-			BYTE bApply = (BYTE)lua_tonumber(L, 1);
++			WORD bApply = (WORD)lua_tonumber(L, 1);
+ 
+ 			if ( bApply >= MAX_APPLY_NUM ) return 0;
+ 
+diff --git a/m2source/Server/game/src/questlua_item.cpp b/m2source/Server/game/src/questlua_item.cpp
+index 1763e149..cd935ef1 100644
+--- a/m2source/Server/game/src/questlua_item.cpp
++++ b/m2source/Server/game/src/questlua_item.cpp
+@@ -814,7 +814,7 @@ namespace quest
+         if (!lua_isnumber(L, 1))
+             return 0;
+ 
+-        BYTE bApply = lua_tonumber(L, 1);
++        WORD bApply = lua_tonumber(L, 1);
+ 
+         item->RemoveAttrByApply(bApply);
+         return 0;
+@@ -830,8 +830,8 @@ namespace quest
+         if (!lua_isnumber(L, 1))
+             return 0;
+ 
+-        BYTE bApply = lua_tonumber(L, 1);
+-		BYTE bLevel = lua_tonumber(L, 2);
++        WORD bApply = lua_tonumber(L, 1);
++		WORD bLevel = lua_tonumber(L, 2);
+ 
+         WORD wValue= item->GetAttrLevelValue(bApply, bLevel);
+         lua_pushnumber(L, wValue);
+diff --git a/m2source/Server/game/src/questlua_party.cpp b/m2source/Server/game/src/questlua_party.cpp
+index ecb887db..a63f67e1 100644
+--- a/m2source/Server/game/src/questlua_party.cpp
++++ b/m2source/Server/game/src/questlua_party.cpp
+@@ -370,7 +370,7 @@ namespace quest
+ 	struct FGiveBuff
+ 	{
+ 		DWORD dwType;
+-		BYTE bApplyOn;
++		WORD bApplyOn;
+ 		long lApplyValue;
+ 		DWORD dwFlag;
+ 		long lDuration;
+@@ -378,7 +378,7 @@ namespace quest
+ 		bool bOverride;
+ 		bool IsCube;
+ 
+-		FGiveBuff (DWORD _dwType, BYTE _bApplyOn, long _lApplyValue, DWORD _dwFlag, long _lDuration,
++		FGiveBuff (DWORD _dwType, WORD _bApplyOn, long _lApplyValue, DWORD _dwFlag, long _lDuration,
+ 					long _lSPCost, bool _bOverride, bool _IsCube = false)
+ 			: dwType (_dwType), bApplyOn (_bApplyOn), lApplyValue (_lApplyValue), dwFlag(_dwFlag), lDuration(_lDuration),
+ 				lSPCost(_lSPCost), bOverride(_bOverride), IsCube(_IsCube)
+@@ -403,7 +403,7 @@ namespace quest
+ 			return 1;
+ 		}
+ 		DWORD dwType = lua_tonumber(L, 1);
+-		BYTE bApplyOn = lua_tonumber(L, 2);
++		WORD bApplyOn = lua_tonumber(L, 2);
+ 		long lApplyValue = lua_tonumber(L, 3);
+ 		DWORD dwFlag = lua_tonumber(L, 4);
+ 		long lDuration = lua_tonumber(L, 5);
+diff --git a/m2source/Server/game/src/questlua_pc.cpp b/m2source/Server/game/src/questlua_pc.cpp
+index acf12412..3cb3e4e4 100644
+--- a/m2source/Server/game/src/questlua_pc.cpp
++++ b/m2source/Server/game/src/questlua_pc.cpp
+@@ -1380,7 +1380,7 @@ namespace quest
+ 
+ 	ALUA(pc_mount_bonus)
+ 	{
+-		BYTE applyOn = static_cast<BYTE>(lua_tonumber(L, 1));
++		WORD applyOn = static_cast<WORD>(lua_tonumber(L, 1));
+ 		long value = static_cast<long>(lua_tonumber(L, 2));
+ 		long duration = static_cast<long>(lua_tonumber(L, 3));
+ 
+diff --git a/m2source/Server/game/src/skill.h b/m2source/Server/game/src/skill.h
+index ecebc7e9..a5d568de 100644
+--- a/m2source/Server/game/src/skill.h
++++ b/m2source/Server/game/src/skill.h
+@@ -204,7 +204,7 @@ class CSkillProto
+ 		BYTE	bLevelLimit;
+ 		int	iSplashRange;
+ 
+-		BYTE	bPointOn;
++		WORD	bPointOn;
+ 		CPoly	kPointPoly;
+ 
+ 		CPoly	kSPCostPoly;
+@@ -226,7 +226,7 @@ class CSkillProto
+ 		BYTE	bSkillAttrType;
+ 
+ 
+-		BYTE	bPointOn2;
++		WORD	bPointOn2;
+ 		CPoly	kPointPoly2;
+ 		CPoly	kDurationPoly2;
+ 		DWORD	dwFlag2;
+@@ -240,7 +240,7 @@ class CSkillProto
+ 		}
+ 
+ 
+-		BYTE bPointOn3;
++		WORD bPointOn3;
+ 		CPoly kPointPoly3;
+ 		CPoly kDurationPoly3;
+ 
